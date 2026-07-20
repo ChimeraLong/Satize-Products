@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Generator — helper tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --crimson:#831530; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Inter',sans-serif; background:#f6f3f1; color:#1c1c1c;
+    padding:32px 18px 80px; display:flex; justify-content:center;
+  }
+  .card{ max-width:560px; width:100%; }
+  h1{ font-family:'Playfair Display',serif; color:var(--crimson); font-size:26px; margin:0 0 6px; }
+  p.lead{ color:#555; font-size:14px; margin:0 0 28px; line-height:1.5; }
+  label{ display:block; font-size:13px; font-weight:500; margin:18px 0 6px; color:#333; }
+  input, textarea{
+    width:100%; padding:11px 13px; border-radius:8px; border:1px solid #ddd;
+    font-family:'Inter',sans-serif; font-size:14px; background:#fff;
+  }
+  textarea{ resize:vertical; min-height:70px; }
+  button{
+    margin-top:24px; background:var(--crimson); color:#fff; border:none;
+    padding:13px 22px; border-radius:999px; font-family:'Playfair Display',serif;
+    font-weight:600; font-style:italic; font-size:15px; cursor:pointer;
+  }
+  button:active{ opacity:0.85; }
+  .output{
+    margin-top:26px; background:#1c1c1c; color:#eaeaea; padding:16px;
+    border-radius:10px; font-family:monospace; font-size:12.5px;
+    white-space:pre-wrap; word-break:break-word; display:none;
+  }
+  .copy-btn{
+    margin-top:10px; background:#fff; color:var(--crimson); border:1px solid var(--crimson);
+    padding:9px 16px; border-radius:8px; font-family:'Inter',sans-serif; font-weight:500;
+    font-size:13px; cursor:pointer; display:none;
+  }
+  .note{ font-size:12.5px; color:#777; margin-top:10px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Post Generator</h1>
+  <p class="lead">Fill this in, tap "Generate", then copy the result into posts.js — paste it inside the POSTS list, right after one of the { } blocks that's already there.</p>
+
+  <label for="videoSrc">Video file name (e.g. videos/mydance.mp4)</label>
+  <input id="videoSrc" placeholder="videos/mydance.mp4">
+
+  <label for="title">Title</label>
+  <input id="title" placeholder="New drop is here">
+
+  <label for="desc">Description</label>
+  <textarea id="desc" placeholder="A short line or two about this post."></textarea>
+
+  <label for="ctaText">Button text</label>
+  <input id="ctaText" placeholder="Shop Now">
+
+  <label for="ctaLink">Button link (where it goes when tapped)</label>
+  <input id="ctaLink" placeholder="https://example.com">
+
+  <button onclick="generate()">Generate</button>
+
+  <div class="output" id="output"></div>
+  <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy to clipboard</button>
+  <p class="note">After copying, open posts.js, paste it as a new block inside the square brackets [ ], and save. Refresh your site to see it live.</p>
+</div>
+
+<script>
+function esc(str){
+  return (str || "").replace(/\\/g,"\\\\").replace(/"/g,'\\"');
+}
+function generate(){
+  const videoSrc = esc(document.getElementById('videoSrc').value || 'videos/yourfile.mp4');
+  const title = esc(document.getElementById('title').value || 'Untitled post');
+  const desc = esc(document.getElementById('desc').value || '');
+  const ctaText = esc(document.getElementById('ctaText').value || 'Learn More');
+  const ctaLink = esc(document.getElementById('ctaLink').value || 'https://example.com');
+
+  const block =
+`  {
+    videoSrc: "${videoSrc}",
+    title: "${title}",
+    description: "${desc}",
+    ctaText: "${ctaText}",
+    ctaLink: "${ctaLink}"
+  },`;
+
+  const out = document.getElementById('output');
+  out.textContent = block;
+  out.style.display = 'block';
+  document.getElementById('copyBtn').style.display = 'inline-block';
+}
+function copyOutput(){
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=> btn.textContent = old, 1500);
+  });
+}
+</script>
+</body>
+</html>

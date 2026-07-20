@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Loading…</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crimson:#831530;
+    --crimson-light:#a81c3d;
+    --white:#ffffff;
+    --dim:rgba(255,255,255,0.72);
+    --black:#000000;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; background:var(--black);
+    font-family:'Inter',-apple-system,sans-serif; overflow:hidden;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; z-index:40;
+    display:flex; align-items:center; justify-content:center;
+    padding:16px 20px calc(16px + env(safe-area-inset-top,0px));
+    padding-top:calc(16px + env(safe-area-inset-top,0px));
+    background:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+    pointer-events:none;
+  }
+  .topbar h1{
+    margin:0; color:var(--white); font-family:'Playfair Display',serif;
+    font-weight:700; font-size:19px; letter-spacing:0.3px;
+    text-shadow:0 1px 6px rgba(0,0,0,0.5);
+  }
+
+  /* ---------- feed ---------- */
+  .feed{
+    height:100%; width:100%;
+    overflow-y:scroll; scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+  }
+  .feed::-webkit-scrollbar{display:none;}
+
+  .post{
+    position:relative; height:100vh; height:100dvh; width:100%;
+    scroll-snap-align:start; scroll-snap-stop:always;
+    display:flex; align-items:flex-end; justify-content:flex-start;
+    background:#111;
+    overflow:hidden;
+  }
+  .post video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; background:#000;
+  }
+  .post .scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 35%, rgba(0,0,0,0) 60%);
+    pointer-events:none;
+  }
+
+  .post-content{
+    position:relative; z-index:5; width:100%;
+    padding:0 20px calc(30px + env(safe-area-inset-bottom,0px)) 20px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .post-title{
+    font-family:'Playfair Display',serif; font-weight:700;
+    font-style:normal; color:var(--white);
+    font-size:26px; line-height:1.2; margin:0;
+    text-shadow:0 2px 10px rgba(0,0,0,0.5);
+    max-width:88%;
+  }
+  .post-desc{
+    color:var(--dim); font-size:14.5px; line-height:1.5; margin:0;
+    max-width:80%; font-weight:400;
+    text-shadow:0 1px 6px rgba(0,0,0,0.5);
+  }
+
+  .cta-btn{
+    margin-top:6px; align-self:flex-start;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--crimson); color:var(--white);
+    font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
+    font-size:16px; letter-spacing:0.2px;
+    padding:13px 26px; border-radius:999px; text-decoration:none;
+    box-shadow:0 6px 20px rgba(131,21,48,0.55), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .cta-btn:active{ transform:scale(0.96); background:var(--crimson-light); }
+
+  /* ---------- mute toggle ---------- */
+  .mute-btn{
+    position:absolute; top:calc(18px + env(safe-area-inset-top,0px)); right:18px; z-index:10;
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.25);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--white); font-size:16px; cursor:pointer;
+  }
+
+  /* ---------- swipe hint ---------- */
+  .swipe-hint{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    z-index:50; color:var(--white); font-size:12px; letter-spacing:1.5px;
+    text-transform:uppercase; opacity:0.85; pointer-events:none;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    animation:hintFade 2.6s ease-in-out infinite;
+    font-family:'Inter',sans-serif;
+  }
+  .swipe-hint svg{ animation:hintBounce 1.4s ease-in-out infinite; }
+  @keyframes hintBounce{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+  @keyframes hintFade{ 0%,100%{opacity:0.85;} 50%{opacity:0.35;} }
+
+  /* ---------- empty state ---------- */
+  .empty-state{
+    height:100%; width:100%; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    color:var(--white); padding:40px; gap:14px;
+  }
+  .empty-state h2{ font-family:'Playfair Display',serif; font-size:24px; margin:0; }
+  .empty-state p{ color:var(--dim); font-size:14px; max-width:320px; margin:0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .swipe-hint, .swipe-hint svg{ animation:none; }
+    .feed{ scroll-behavior:auto; }
+  }
+
+  @media (min-width:700px){
+    .post-title{ font-size:32px; }
+    .post-desc{ font-size:16px; }
+    .post-content{ padding-bottom:60px; max-width:640px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><h1 id="siteTitle"></h1></div>
+<div class="feed" id="feed"></div>
+<div class="swipe-hint" id="swipeHint">
+  <span>Swipe up</span>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</div>
+
+<script src="posts.js"></script>
+<script>
+document.title = SITE_TITLE;
+document.getElementById('siteTitle').textContent = SITE_TITLE;
+
+const feed = document.getElementById('feed');
+const hint = document.getElementById('swipeHint');
+
+if (!POSTS || POSTS.length === 0) {
+  feed.innerHTML = `
+    <div class="empty-state">
+      <h2>No posts yet</h2>
+      <p>Open posts.js and add your first post following the instructions at the top of the file.</p>
+    </div>`;
+  hint.style.display = 'none';
+} else {
+  POSTS.forEach((post, i) => {
+    const section = document.createElement('section');
+    section.className = 'post';
+    section.innerHTML = `
+      <video src="${post.videoSrc}" loop muted playsinline preload="metadata"></video>
+      <div class="scrim"></div>
+      <button class="mute-btn" aria-label="Toggle sound">🔇</button>
+      <div class="post-content">
+        <h2 class="post-title">${escapeHTML(post.title)}</h2>
+        <p class="post-desc">${escapeHTML(post.description)}</p>
+        <a class="cta-btn" href="${post.ctaLink}" target="_blank" rel="noopener">${escapeHTML(post.ctaText)}</a>
+      </div>
+    `;
+    feed.appendChild(section);
+  });
+}
+
+function escapeHTML(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+// play the video currently in view, pause the rest
+const videos = Array.from(document.querySelectorAll('.post video'));
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const video = entry.target;
+    if (entry.isIntersecting) {
+      video.play().catch(()=>{});
+    } else {
+      video.pause();
+    }
+  });
+}, { threshold: 0.6 });
+videos.forEach(v => observer.observe(v));
+
+// mute/unmute per post
+document.querySelectorAll('.post').forEach(post => {
+  const video = post.querySelector('video');
+  const btn = post.querySelector('.mute-btn');
+  if (!video || !btn) return;
+  btn.addEventListener('click', () => {
+    video.muted = !video.muted;
+    btn.textContent = video.muted ? '🔇' : '🔊';
+  });
+});
+
+// hide the swipe hint after first scroll
+let hintHidden = false;
+feed.addEventListener('scroll', () => {
+  if (!hintHidden) {
+    hint.style.opacity = '0';
+    hintHidden = true;
+    setTimeout(()=> hint.style.display='none', 400);
+  }
+}, { once:true });
+</script>
+</body>
+</html>
